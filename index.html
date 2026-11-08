@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f4f6fb">
+    <title>Deadline Traffic Light</title>
+    <style>
+        *{box-sizing:border-box}body{margin:0;min-height:100vh;padding:48px 18px;background:linear-gradient(145deg,#eef1ff,#f7f8fc 48%,#eef8f3);color:#20283c;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}.container{width:min(720px,100%);margin:0 auto}.heading{margin-bottom:26px}h1{margin:0;font-size:clamp(2rem,6vw,2.8rem);letter-spacing:-.05em}.heading p{margin:8px 0 0;color:#6b7489}.card{padding:24px;border:1px solid #e6e9f1;border-radius:18px;background:#fff;box-shadow:0 12px 35px #20283c0d}.form{display:grid;grid-template-columns:1fr 190px auto;gap:12px}input,button{height:46px;border-radius:10px;font:inherit}input{min-width:0;padding:0 12px;border:1px solid #dfe3ec;background:#fff;color:inherit;outline:none}input:focus{border-color:#5368df;box-shadow:0 0 0 3px #5368df20}button{padding:0 17px;border:0;background:#4056d6;color:#fff;font-weight:700;cursor:pointer}button:hover{background:#3045c3}h2{margin:26px 0 12px;font-size:1.05rem}.list{display:grid;gap:10px}.task{display:flex;align-items:center;gap:14px;padding:14px;border:1px solid #e8eaf0;border-radius:12px}.light{width:14px;height:14px;flex:none;border-radius:50%;background:#c2c7d1;box-shadow:0 0 0 5px #c2c7d122}.task[data-status="green"] .light{background:#20a36a;box-shadow:0 0 0 5px #20a36a20}.task[data-status="yellow"] .light{background:#e2a000;box-shadow:0 0 0 5px #e2a00020}.task[data-status="red"] .light{background:#e24d56;box-shadow:0 0 0 5px #e24d5620}.details{flex:1;min-width:0}.task-name{font-weight:700;overflow-wrap:anywhere}.date{margin-top:3px;color:#778096;font-size:.84rem}.status{padding:6px 9px;border-radius:99px;background:#f0f2f6;color:#657087;font-size:.76rem;font-weight:700;white-space:nowrap}.task[data-status="green"] .status{background:#e8f7ef;color:#18734d}.task[data-status="yellow"] .status{background:#fff5d8;color:#8b6500}.task[data-status="red"] .status{background:#ffebed;color:#b3343d}.remove{width:34px;height:34px;padding:0;background:transparent;color:#8991a2;font-size:1.2rem}.remove:hover{background:#f2f3f7;color:#b3343d}.empty{padding:24px 12px;border:1px dashed #dfe3ec;border-radius:12px;color:#778096;text-align:center}.legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:17px;color:#6b7489;font-size:.78rem}.legend span{display:inline-flex;align-items:center;gap:7px}.legend i{width:9px;height:9px;border-radius:50%}.legend .g{background:#20a36a}.legend .y{background:#e2a000}.legend .r{background:#e24d56}@media(max-width:600px){body{padding:30px 14px}.card{padding:17px}.form{grid-template-columns:1fr 1fr}.form input:first-child{grid-column:1/-1}.form button{grid-column:1/-1}.task{gap:10px;padding:12px}.status{font-size:.7rem}}
+    </style>
+</head>
+<body>
+    <main class="container">
+        <header class="heading">
+            <h1>Deadline Traffic Light</h1>
+            <p>Pengingat tugas berdasarkan waktu deadline</p>
+        </header>
+        <section class="card" aria-label="Pengelola deadline">
+            <form class="form" id="formTugas">
+                <input type="text" id="namaTugas" maxlength="100" placeholder="Nama tugas" aria-label="Nama tugas" required>
+                <input type="date" id="tanggal" aria-label="Tanggal deadline" required>
+                <button type="submit">Tambah Tugas</button>
+            </form>
+            <h2>Daftar Deadline</h2>
+            <div class="list" id="daftarTugas" aria-live="polite"></div>
+            <div class="legend" aria-label="Keterangan status">
+                <span><i class="g"></i>Aman: lebih dari 3 hari</span>
+                <span><i class="y"></i>Segera: 0–3 hari</span>
+                <span><i class="r"></i>Terlambat</span>
+            </div>
+        </section>
+    </main>
+    <script>
+        (() => {
+            const form = document.getElementById('formTugas');
+            const nama = document.getElementById('namaTugas');
+            const tanggal = document.getElementById('tanggal');
+            const daftar = document.getElementById('daftarTugas');
+            const key = 'deadline-traffic-light-tugas';
+            let tugas = [];
+            try { tugas = JSON.parse(localStorage.getItem(key) || '[]'); if (!Array.isArray(tugas)) tugas = []; } catch { tugas = []; }
+
+            const hariIni = () => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); };
+            const tanggalTampil = value => new Date(value + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+            function render() {
+                daftar.replaceChildren();
+                tugas.sort((a, b) => a.tanggal.localeCompare(b.tanggal));
+                if (!tugas.length) {
+                    const kosong = document.createElement('div'); kosong.className = 'empty'; kosong.textContent = 'Belum ada deadline. Tambahkan tugas pertama Anda.'; daftar.append(kosong); return;
+                }
+                const now = hariIni();
+                tugas.forEach(item => {
+                    const selisih = Math.round((new Date(item.tanggal + 'T00:00:00') - now) / 86400000);
+                    const status = selisih < 0 ? 'red' : selisih <= 3 ? 'yellow' : 'green';
+                    const label = selisih < 0 ? `Terlambat ${Math.abs(selisih)} hari` : selisih === 0 ? 'Deadline hari ini' : selisih === 1 ? 'Besok' : `${selisih} hari lagi`;
+                    const baris = document.createElement('article'); baris.className = 'task'; baris.dataset.status = status;
+                    const lampu = document.createElement('span'); lampu.className = 'light'; lampu.setAttribute('aria-hidden', 'true');
+                    const detail = document.createElement('div'); detail.className = 'details';
+                    const namaTampil = document.createElement('div'); namaTampil.className = 'task-name'; namaTampil.textContent = item.nama;
+                    const tanggalTampilEl = document.createElement('div'); tanggalTampilEl.className = 'date'; tanggalTampilEl.textContent = tanggalTampil(item.tanggal);
+                    detail.append(namaTampil, tanggalTampilEl);
+                    const badge = document.createElement('span'); badge.className = 'status'; badge.textContent = label;
+                    const hapus = document.createElement('button'); hapus.type = 'button'; hapus.className = 'remove'; hapus.textContent = '×'; hapus.setAttribute('aria-label', `Hapus tugas ${item.nama}`);
+                    hapus.addEventListener('click', () => { tugas = tugas.filter(t => t.id !== item.id); simpan(); render(); });
+                    baris.append(lampu, detail, badge, hapus); daftar.append(baris);
+                });
+            }
+            function simpan() { try { localStorage.setItem(key, JSON.stringify(tugas)); } catch {} }
+            form.addEventListener('submit', event => {
+                event.preventDefault();
+                const namaTugas = nama.value.trim();
+                if (!namaTugas || !tanggal.value) return;
+                tugas.push({ id: `${Date.now()}-${Math.random()}`, nama: namaTugas, tanggal: tanggal.value });
+                simpan(); form.reset(); render(); nama.focus();
+            });
+            render();
+        })();
+    </script>
+</body>
+</html>

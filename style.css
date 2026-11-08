@@ -1,0 +1,89 @@
+
+/* Mengatur tampilan seluruh halaman */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #eaf0f7;
+    margin: 0;
+    padding: 30px;
+}
+
+/* Mengatur kotak utama aplikasi */
+.container {
+    background-color: white;
+    max-width: 700px;
+    margin: auto;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Mengatur judul aplikasi */
+h1 {
+    text-align: center;
+    color: #234477;
+    margin-bottom: 25px;
+}
+
+/* Mengatur judul bagian */
+h3 {
+    color: #333;
+}
+
+/* Mengatur kolom input */
+input {
+    width: 95%;
+    padding: 12px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+/* Mengatur tombol */
+button {
+    background-color: #2459a6;
+    color: white;
+    padding: 12px 18px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+/* Warna tombol ketika diarahkan kursor */
+button:hover {
+    background-color: #163d78;
+}
+
+/* Mengatur tampilan daftar tugas */
+.task {
+    background-color: #f0f2f5;
+    padding: 15px;
+    margin-top: 12px;
+    border-radius: 8px;
+    border-left: 5px solid #2459a6;
+}
+
+/* Mengatur lampu traffic light */
+.lamp {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+/* Lampu hijau */
+.hijau {
+    background-color: green;
+}
+
+/* Lampu kuning */
+.kuning {
+    background-color: orange;
+}
+
+/* Lampu merah */
+.merah {
+    background-color: red;
+}
